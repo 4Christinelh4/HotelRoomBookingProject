@@ -2,6 +2,7 @@ package renders
 
 import (
 	"bytes"
+	"github.com/justinas/nosurf"
 	"html/template"
 	"log"
 	"my/gomodule/internal/config"
@@ -19,11 +20,11 @@ func NewTemplates(a *config.AppConfig) {
 	app = a
 }
 
-func AddDefaultData(td *models.TemplateData) *models.TemplateData {
-	return td
+func AddDefaultData(td *models.TemplateData, r *http.Request) {
+	td.CSRFToken = nosurf.Token(r)
 }
 
-func Template(w http.ResponseWriter, tmpl string, td *models.TemplateData) {
+func Template(w http.ResponseWriter, r *http.Request, tmpl string, td *models.TemplateData) {
 	var tc map[string]*template.Template
 
 	if app.UseCache {
@@ -44,7 +45,7 @@ func Template(w http.ResponseWriter, tmpl string, td *models.TemplateData) {
 
 	buf := new(bytes.Buffer)
 
-	td = AddDefaultData(td)
+	AddDefaultData(td, r)
 	_ = t.Execute(buf, td)
 
 	// render the template
@@ -69,7 +70,6 @@ func CreateTemplateCache() (map[string]*template.Template, error) {
 		ts, err := template.New(name).ParseFiles(page)
 
 		if err != nil {
-			log.Println("Error in", name, " ", err)
 			return myCache, err
 		}
 

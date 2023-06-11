@@ -1,8 +1,11 @@
 package handlers
 
 import (
+	"encoding/json"
+	"log"
 	"my/gomodule/internal/config"
 	"my/gomodule/internal/driver"
+	"my/gomodule/internal/helpers"
 	"my/gomodule/internal/models"
 	"my/gomodule/internal/renders"
 	"my/gomodule/internal/repository"
@@ -32,20 +35,63 @@ func NewHandlers(r *Repository) {
 
 // Home: home page
 func (m *Repository) Home(w http.ResponseWriter, r *http.Request) {
-	renders.Template(w, "home.page.html", &models.TemplateData{})
+	renders.Template(w, r, "home.page.html", &models.TemplateData{})
 }
 
 // About
 func (m *Repository) About(w http.ResponseWriter, r *http.Request) {
-	//s := addValues(5, 8)
-	//_, _ = fmt.Fprintf(w, "This is the about page, the sum is %d\n", s)
-	//stringMap := make(map[string]string)
-	//stringMap["test"] = "hello, world"
-	//
-	//remoteIp := m.App.Session.GetString(r.Context(), session_key)
-	//log.Println("remoteIP is", remoteIp)
-	//
-	//stringMap[session_key] = remoteIp
+	renders.Template(w, r, "about.page.html", &models.TemplateData{})
+}
 
-	renders.Template(w, "about.page.html", &models.TemplateData{})
+func (m *Repository) Generals(w http.ResponseWriter, r *http.Request) {
+	renders.Template(w, r, "generals.page.html", &models.TemplateData{})
+}
+
+func (m *Repository) Majors(w http.ResponseWriter, r *http.Request) {
+	renders.Template(w, r, "majors.html", &models.TemplateData{})
+}
+
+func (m *Repository) Availability(w http.ResponseWriter, r *http.Request) {
+	renders.Template(w, r, "search-availability.page.html", &models.TemplateData{})
+}
+
+type jsonResp struct {
+	OK      bool   `json:"ok"`
+	Message string `json:"message"`
+}
+
+func (m *Repository) AvailabilityJson(w http.ResponseWriter, r *http.Request) {
+	//start := r.Form.Get("started")
+	//end := r.Form.Get("end")
+	//w.Write([]byte(fmt.Sprintf("Posted method, start = %s, end = %s", start, end)))
+	resp := jsonResp{
+		OK:      true,
+		Message: "available",
+	}
+
+	out, err := json.MarshalIndent(resp, "", "	")
+	if err != nil {
+		log.Print(err)
+	}
+	w.Header().Set("Content-Type", "application/json")
+	w.Write(out)
+}
+
+func (m *Repository) Contact(w http.ResponseWriter, r *http.Request) {
+	renders.Template(w, r, "contact.page.html", &models.TemplateData{})
+}
+
+func (m *Repository) PostReservation(w http.ResponseWriter, r *http.Request) {
+	err := r.ParseForm()
+	if err != nil {
+		helpers.ServerError(w, err)
+		return
+	}
+
+	//sd := r.Form.Get("start_date")
+	//ed := r.Form.Get("end_date")
+	//
+	//reservation := {
+	//
+	//}
 }
