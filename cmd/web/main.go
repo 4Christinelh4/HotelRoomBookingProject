@@ -1,6 +1,7 @@
 package main
 
 import (
+	"encoding/gob"
 	"fmt"
 	"github.com/alexedwards/scs/v2"
 	"log"
@@ -8,6 +9,7 @@ import (
 	"my/gomodule/internal/driver"
 	"my/gomodule/internal/handlers"
 	"my/gomodule/internal/helpers"
+	"my/gomodule/internal/models"
 	"my/gomodule/internal/renders"
 	"net/http"
 	"os"
@@ -23,6 +25,11 @@ var app config.AppConfig
 var session *scs.SessionManager
 
 func run() (*driver.DB, error) {
+	gob.Register(models.Reservation{})
+	gob.Register(models.User{})
+	gob.Register(models.Room{})
+	gob.Register(models.Restriction{})
+
 	app.InProduction = false
 
 	infoLog = log.New(os.Stdout, "INFO\t", log.Ldate|log.Ltime)

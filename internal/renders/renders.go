@@ -23,7 +23,7 @@ func AddDefaultData(td *models.TemplateData) *models.TemplateData {
 	return td
 }
 
-func RenderTemplate(w http.ResponseWriter, tmpl string, td *models.TemplateData) {
+func Template(w http.ResponseWriter, tmpl string, td *models.TemplateData) {
 	var tc map[string]*template.Template
 
 	if app.UseCache {
@@ -57,7 +57,6 @@ func RenderTemplate(w http.ResponseWriter, tmpl string, td *models.TemplateData)
 func CreateTemplateCache() (map[string]*template.Template, error) {
 	myCache := map[string]*template.Template{}
 	// get all of the files named *.page from the directory
-
 	pages, err := filepath.Glob("templates/*.page.html")
 	if err != nil {
 		log.Println("filepath.Glob: ", err)

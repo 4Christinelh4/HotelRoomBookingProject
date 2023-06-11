@@ -1,7 +1,6 @@
 package handlers
 
 import (
-	"log"
 	"my/gomodule/internal/config"
 	"my/gomodule/internal/driver"
 	"my/gomodule/internal/models"
@@ -31,33 +30,22 @@ func NewHandlers(r *Repository) {
 	Repo = r
 }
 
-const session_key = "remote_ip"
-
-// var stringMap = make(map[string]string)
-
 // Home: home page
 func (m *Repository) Home(w http.ResponseWriter, r *http.Request) {
-	remoteIp := r.RemoteAddr
-	m.App.Session.Put(r.Context(), session_key, remoteIp)
-
-	renders.RenderTemplate(w, "home.page.html", &models.TemplateData{
-		//StringMap: stringMap,
-	})
+	renders.Template(w, "home.page.html", &models.TemplateData{})
 }
 
 // About
 func (m *Repository) About(w http.ResponseWriter, r *http.Request) {
 	//s := addValues(5, 8)
 	//_, _ = fmt.Fprintf(w, "This is the about page, the sum is %d\n", s)
-	stringMap := make(map[string]string)
-	stringMap["test"] = "hello, world"
+	//stringMap := make(map[string]string)
+	//stringMap["test"] = "hello, world"
+	//
+	//remoteIp := m.App.Session.GetString(r.Context(), session_key)
+	//log.Println("remoteIP is", remoteIp)
+	//
+	//stringMap[session_key] = remoteIp
 
-	remoteIp := m.App.Session.GetString(r.Context(), session_key)
-	log.Println("remoteIP is", remoteIp)
-
-	stringMap[session_key] = remoteIp
-
-	renders.RenderTemplate(w, "about.page.html", &models.TemplateData{
-		StringMap: stringMap,
-	})
+	renders.Template(w, "about.page.html", &models.TemplateData{})
 }
