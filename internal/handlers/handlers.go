@@ -5,7 +5,7 @@ import (
 	"log"
 	"my/gomodule/internal/config"
 	"my/gomodule/internal/driver"
-	"my/gomodule/internal/helpers"
+	"my/gomodule/internal/forms"
 	"my/gomodule/internal/models"
 	"my/gomodule/internal/renders"
 	"my/gomodule/internal/repository"
@@ -35,24 +35,24 @@ func NewHandlers(r *Repository) {
 
 // Home: home page
 func (m *Repository) Home(w http.ResponseWriter, r *http.Request) {
-	renders.Template(w, r, "home.page.html", &models.TemplateData{})
+	renders.Template(w, r, "home.page.tmpl", &models.TemplateData{})
 }
 
 // About
 func (m *Repository) About(w http.ResponseWriter, r *http.Request) {
-	renders.Template(w, r, "about.page.html", &models.TemplateData{})
+	renders.Template(w, r, "about.page.tmpl", &models.TemplateData{})
 }
 
 func (m *Repository) Generals(w http.ResponseWriter, r *http.Request) {
-	renders.Template(w, r, "generals.page.html", &models.TemplateData{})
+	renders.Template(w, r, "generals.page.tmpl", &models.TemplateData{})
 }
 
 func (m *Repository) Majors(w http.ResponseWriter, r *http.Request) {
-	renders.Template(w, r, "majors.html", &models.TemplateData{})
+	renders.Template(w, r, "majors.page.tmpl", &models.TemplateData{})
 }
 
 func (m *Repository) Availability(w http.ResponseWriter, r *http.Request) {
-	renders.Template(w, r, "search-availability.page.html", &models.TemplateData{})
+	renders.Template(w, r, "search-availability.page.tmpl", &models.TemplateData{})
 }
 
 type jsonResp struct {
@@ -78,20 +78,42 @@ func (m *Repository) AvailabilityJson(w http.ResponseWriter, r *http.Request) {
 }
 
 func (m *Repository) Contact(w http.ResponseWriter, r *http.Request) {
-	renders.Template(w, r, "contact.page.html", &models.TemplateData{})
+	renders.Template(w, r, "contact.page.tmpl", &models.TemplateData{})
 }
 
+// Reservation handles reservation form
+func (m *Repository) Reservation(w http.ResponseWriter, r *http.Request) {
+	renders.Template(w, r, "make-reservation.page.tmpl", &models.TemplateData{
+		Form: forms.New(nil),
+	})
+}
+
+// PostReservation handles reservation form
 func (m *Repository) PostReservation(w http.ResponseWriter, r *http.Request) {
 	err := r.ParseForm()
 	if err != nil {
-		helpers.ServerError(w, err)
+		log.Println(err)
 		return
 	}
 
-	//sd := r.Form.Get("start_date")
-	//ed := r.Form.Get("end_date")
-	//
-	//reservation := {
-	//
-	//}
+	reservation := models.Reservation{
+		FirstName: r.Form.Get("first_name"),
+		LastName:  r.Form.Get("last_name"),
+		Phone:     r.Form.Get("phone"),
+		Email:     r.Form.Get("email"),
+	}
+
+	form := forms.New(r.PostForm)
+
+	form.Has("first_name", r)
+	if !form.Valid() {
+		data := make(map[string]interface{})
+		data["reservation"] = reservation
+
+		renders.Template(w, r, "make-reservation.page.tmpl", &models.TemplateData{
+			Form: form,
+			Data: data,
+		})
+	}
+
 }
