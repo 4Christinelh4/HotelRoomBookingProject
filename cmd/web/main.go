@@ -30,6 +30,9 @@ func run() (*driver.DB, error) {
 	gob.Register(models.Room{})
 	gob.Register(models.Restriction{})
 
+	mailChan := make(chan models.MailData)
+	app.MailChan = mailChan
+
 	app.InProduction = false
 
 	infoLog = log.New(os.Stdout, "INFO\t", log.Ldate|log.Ltime)
@@ -81,9 +84,20 @@ func main() {
 		log.Fatal(err)
 	}
 	defer db.SQL.Close()
+	defer close(app.MailChan)
+
+	listenForMail()
+
+	//msg := models.MailData{
+	//	To:      "Olivia@do.ca",
+	//	From:    "Me@here",
+	//	Subject: "Hello, Olivia",
+	//	Content: "Hello:)",
+	//}
+	//
+	//app.MailChan <- msg
 
 	fmt.Println(fmt.Sprintf("Starting application on port 8080"))
-
 	srv := &http.Server{
 		Addr:    portNumber,
 		Handler: RoutesApp(&app),

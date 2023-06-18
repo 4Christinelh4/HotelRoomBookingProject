@@ -4,6 +4,7 @@ import (
 	"github.com/alexedwards/scs/v2"
 	"html/template"
 	"log"
+	"my/gomodule/internal/models"
 )
 
 // AppConfig holds the application config
@@ -14,4 +15,5 @@ type AppConfig struct {
 	ErrorLog      *log.Logger
 	InProduction  bool
 	Session       *scs.SessionManager
+	MailChan      chan models.MailData
 }

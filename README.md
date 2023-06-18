@@ -24,4 +24,12 @@ JavaScript-generated requests.
 4. The web application checks if the CSRF token received matches the one associated 
 with the user's session. If they don't match or the token is missing, the request is considered invalid, and the action is not performed.
 
+### SMTP
+Mail servers use SMTP to send and receive email. It needs TCP connection to be set up.
+Process: \
+(1) establish TCP connection. \
+(2) Client: send HELO to identity check, send MAIL representing that a mail needs
+to be sent. Server sends OK to client. \
+(3) 
+
 
