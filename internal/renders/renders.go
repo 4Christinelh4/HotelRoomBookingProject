@@ -34,11 +34,7 @@ func Template(w http.ResponseWriter, r *http.Request, tmpl string, td *models.Te
 		tc, _ = CreateTemplateCache()
 	}
 
-	// get requested template from cache
-	log.Println("page:", tmpl)
-
 	t, ok := tc[tmpl]
-
 	if !ok {
 		log.Fatal("Cannot get template from template cache")
 	}
@@ -86,7 +82,6 @@ func CreateTemplateCache() (map[string]*template.Template, error) {
 		}
 
 		myCache[name] = ts
-		log.Println("added name:", name)
 	}
 
 	return myCache, nil

@@ -88,15 +88,6 @@ func main() {
 
 	listenForMail()
 
-	//msg := models.MailData{
-	//	To:      "Olivia@do.ca",
-	//	From:    "Me@here",
-	//	Subject: "Hello, Olivia",
-	//	Content: "Hello:)",
-	//}
-	//
-	//app.MailChan <- msg
-
 	fmt.Println(fmt.Sprintf("Starting application on port 8080"))
 	srv := &http.Server{
 		Addr:    portNumber,

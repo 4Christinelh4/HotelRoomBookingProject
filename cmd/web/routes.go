@@ -29,6 +29,8 @@ func RoutesApp(app *config.AppConfig) http.Handler {
 	mux.Get("/make-reservation", handlers.Repo.Reservation)
 	mux.Post("/make-reservation", handlers.Repo.PostReservation)
 
+	mux.Get("/user/login", handlers.Repo.DoLogin)
+
 	mux.Get("/contact", handlers.Repo.Contact)
 	mux.Get("/reservation-summary", handlers.Repo.ReservationSummary)
 

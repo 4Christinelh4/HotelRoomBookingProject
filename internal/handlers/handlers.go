@@ -114,6 +114,12 @@ func (m *Repository) Reservation(w http.ResponseWriter, r *http.Request) {
 	})
 }
 
+func (m *Repository) DoLogin(w http.ResponseWriter, r *http.Request) {
+	renders.Template(w, r, "login.page.tmpl", &models.TemplateData{
+		Form: forms.New(nil),
+	})
+}
+
 // PostReservation handles reservation form
 func (m *Repository) PostReservation(w http.ResponseWriter, r *http.Request) {
 	err := r.ParseForm()
@@ -191,6 +197,22 @@ func (m *Repository) PostReservation(w http.ResponseWriter, r *http.Request) {
 	//	helpers.ServerError(w, err)
 	//	return
 	//}
+
+	htmlMessage := fmt.Sprintf(`<strong>Reservation Confirmation</strong><br>
+		Dear %s, <br>
+		This is confirm your reservation from %s to %s
+	`, reservation.FirstName, reservation.StartDate.Format("2006-01-02"),
+		reservation.EndDate.Format("2006-01-02"))
+
+	msg := models.MailData{
+		To:       reservation.Email,
+		From:     "Me@here",
+		Subject:  "Reservation Confirmation",
+		Content:  htmlMessage,
+		Template: "basic.html",
+	}
+
+	m.App.MailChan <- msg
 
 	m.App.Session.Put(r.Context(), "reservation", reservation)
 	http.Redirect(w, r, "/reservation-summary", http.StatusSeeOther)
