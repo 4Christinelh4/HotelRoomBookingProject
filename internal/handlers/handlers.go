@@ -120,6 +120,41 @@ func (m *Repository) DoLogin(w http.ResponseWriter, r *http.Request) {
 	})
 }
 
+func (m *Repository) PostDoLogin(w http.ResponseWriter, r *http.Request) {
+	_ = m.App.Session.RenewToken(r.Context())
+	err := r.ParseForm()
+	if err != nil {
+		log.Println(err)
+	}
+	var email, password string
+
+	form := forms.New(r.PostForm)
+	form.Required("email", "password")
+
+	if !form.Valid() {
+		log.Println("not valid")
+		renders.Template(w, r, "login.page.tmpl", &models.TemplateData{
+			Form: form,
+		})
+		return
+	}
+
+	email = r.Form.Get("email")
+	password = r.Form.Get("password")
+
+	id, _, err := m.DB.Authenticate(email, password)
+	if err != nil {
+		log.Println(err)
+		m.App.Session.Put(r.Context(), "error", "Invalid login credentials")
+		http.Redirect(w, r, "/user/login", http.StatusSeeOther)
+		return
+	}
+
+	m.App.Session.Put(r.Context(), "user_id", id)
+	m.App.Session.Put(r.Context(), "flash", "Logged in")
+	http.Redirect(w, r, "/", http.StatusSeeOther)
+}
+
 // PostReservation handles reservation form
 func (m *Repository) PostReservation(w http.ResponseWriter, r *http.Request) {
 	err := r.ParseForm()
@@ -209,7 +244,7 @@ func (m *Repository) PostReservation(w http.ResponseWriter, r *http.Request) {
 		From:     "Me@here",
 		Subject:  "Reservation Confirmation",
 		Content:  htmlMessage,
-		Template: "basic.html",
+		Template: "",
 	}
 
 	m.App.MailChan <- msg

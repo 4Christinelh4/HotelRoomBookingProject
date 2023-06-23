@@ -8,4 +8,10 @@ type DatabaseRepo interface {
 	InsertReservation(res models.Reservation) (int, error)
 
 	InsertRoomRestriction(res models.RoomRestrictions) error
+
+	GetUserByID(id int) (models.User, error)
+
+	UpdateUser(u models.User) error
+
+	Authenticate(email, password string) (int, string, error)
 }
