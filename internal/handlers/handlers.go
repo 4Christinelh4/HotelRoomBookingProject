@@ -120,6 +120,12 @@ func (m *Repository) DoLogin(w http.ResponseWriter, r *http.Request) {
 	})
 }
 
+func (m *Repository) DoLogout(w http.ResponseWriter, r *http.Request) {
+	_ = m.App.Session.Destroy(r.Context())
+	_ = m.App.Session.RenewToken(r.Context())
+	http.Redirect(w, r, "/user/login", http.StatusSeeOther)
+}
+
 func (m *Repository) PostDoLogin(w http.ResponseWriter, r *http.Request) {
 	_ = m.App.Session.RenewToken(r.Context())
 	err := r.ParseForm()

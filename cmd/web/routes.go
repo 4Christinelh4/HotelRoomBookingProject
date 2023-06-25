@@ -31,6 +31,7 @@ func RoutesApp(app *config.AppConfig) http.Handler {
 
 	mux.Get("/user/login", handlers.Repo.DoLogin)
 	mux.Post("/user/login", handlers.Repo.PostDoLogin)
+	mux.Get("/user/logout", handlers.Repo.DoLogout)
 
 	mux.Get("/contact", handlers.Repo.Contact)
 	mux.Get("/reservation-summary", handlers.Repo.ReservationSummary)

@@ -77,7 +77,20 @@
                 </li>
 
                 <li class="nav-item">
-                    <a class="nav-link" href="/user/login">Login</a>
+                    {{if eq .IsAuthenticated 1}}
+                        <li class="nav-item dropdown">
+                            <a class="nav-link dropdown-toggle" href="#" id="navbarDropdownMenuLink" role="button"
+                               data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+                                Admin
+                            </a>
+                            <div class="dropdown-menu" aria-labelledby="navbarDropdownMenuLink">
+                                <a class="dropdown-item" href="/admin/dashboard">General's Quarters</a>
+                                <a class="dropdown-item" href="/user/logout">Major's Suite</a>
+                            </div>
+                        </li>
+                    {{else}}
+                        <a class="nav-link" href="/user/login">Log in</a>
+                    {{end}}
                 </li>
 
             </ul>
