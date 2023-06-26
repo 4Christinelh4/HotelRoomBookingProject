@@ -258,3 +258,26 @@ func (m *Repository) PostReservation(w http.ResponseWriter, r *http.Request) {
 	m.App.Session.Put(r.Context(), "reservation", reservation)
 	http.Redirect(w, r, "/reservation-summary", http.StatusSeeOther)
 }
+
+func (m *Repository) AdminDashboard(w http.ResponseWriter, r *http.Request) {
+	renders.Template(w, r, "/admin-dashboard.page.tmpl", &models.TemplateData{})
+}
+
+func (m *Repository) AdminNewReservations(w http.ResponseWriter, r *http.Request) {
+	renders.Template(w, r, "/admin-new-reservations.page.tmpl", &models.TemplateData{})
+}
+
+func (m *Repository) AdminAllReservations(w http.ResponseWriter, r *http.Request) {
+	allReservations, err := m.DB.AllReservations()
+	if err != nil {
+		helpers.ServerError(w, err)
+		return
+	}
+
+	data := make(map[string]interface{})
+	data["reservations"] = allReservations
+
+	renders.Template(w, r, "/admin-all-reservations.page.tmpl", &models.TemplateData{
+		Data: data,
+	})
+}

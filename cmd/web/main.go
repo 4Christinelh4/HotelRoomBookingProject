@@ -2,6 +2,7 @@ package main
 
 import (
 	"encoding/gob"
+	"flag"
 	"fmt"
 	"github.com/alexedwards/scs/v2"
 	"log"
@@ -30,10 +31,26 @@ func run() (*driver.DB, error) {
 	gob.Register(models.Room{})
 	gob.Register(models.Restriction{})
 
+	// read flags
+	inProduction := flag.Bool("production", true, "App is in production")
+	useCache := flag.Bool("cache", true, "Use template cache")
+	dbHost := flag.String("dbhost", "localhost", "Database host")
+	dbName := flag.String("dbname", "", "Database name")
+	//dbUser := flag.String("dbuser", "", "Database user name")
+	//dbPass := flag.String("dbpassword", "", "Database password")
+	dbPort := flag.String("dbport", "5432", "Database port")
+	//dbSSL := flag.String("dbssl", "disable", "Database ssl")
+
+	flag.Parse()
+	if *dbName == "" {
+		fmt.Println("Missing require flags")
+		os.Exit(1)
+	}
+
 	mailChan := make(chan models.MailData)
 	app.MailChan = mailChan
 
-	app.InProduction = false
+	app.InProduction = *inProduction
 
 	infoLog = log.New(os.Stdout, "INFO\t", log.Ldate|log.Ltime)
 	app.InfoLog = infoLog
@@ -48,9 +65,11 @@ func run() (*driver.DB, error) {
 
 	app.Session = session
 
-	// connect to database
-	log.Println("Connecting to DB")
-	db, err := driver.ConnectSQL("host=localhost port=5432 dbname=bookings")
+	connectionString := fmt.Sprintf("host=%s port=%s dbname=%s",
+		*dbHost, *dbPort, *dbName)
+
+	// "host=localhost port=5432 dbname=bookings"
+	db, err := driver.ConnectSQL(connectionString)
 	if err != nil {
 		log.Fatal("Cannot connect to DB bookings")
 		return nil, err
@@ -63,9 +82,7 @@ func run() (*driver.DB, error) {
 		return nil, err
 	}
 
-	log.Println("Created template cache")
-
-	app.UseCache = true
+	app.UseCache = *useCache
 	app.TemplateCache = tc
 
 	repo := handlers.NewRepo(&app, db)
