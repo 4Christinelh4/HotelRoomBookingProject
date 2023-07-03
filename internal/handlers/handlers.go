@@ -1,7 +1,6 @@
 package handlers
 
 import (
-	"encoding/json"
 	"fmt"
 	"log"
 	"my/gomodule/internal/config"
@@ -56,29 +55,54 @@ func (m *Repository) Majors(w http.ResponseWriter, r *http.Request) {
 }
 
 func (m *Repository) Availability(w http.ResponseWriter, r *http.Request) {
+	// w.Write([]byte("Availability-Get page"))
 	renders.Template(w, r, "search-availability.page.tmpl", &models.TemplateData{})
+}
+
+func (m *Repository) PostAvailability(w http.ResponseWriter, r *http.Request) {
+	start := r.Form.Get("start")
+	end := r.Form.Get("end")
+
+	layout := "2006-01-02"
+	startDate, err := time.Parse(layout, start)
+	if err != nil {
+		helpers.ServerError(w, err)
+		return
+	}
+
+	endDate, err := time.Parse(layout, end)
+	if err != nil {
+		helpers.ServerError(w, err)
+		return
+	}
+
+	rooms, err := m.DB.SearchAvailabilityForAllRooms(startDate, endDate)
+
+	//for _, i := range rooms {
+	//	m.App.InfoLog.Println("ROOM: ", i.ID, i.RoomName)
+	//}
+
+	if len(rooms) == 0 {
+		m.App.Session.Put(r.Context(), "error", "No availability")
+		http.Redirect(w, r, "/search-availability", http.StatusSeeOther)
+	}
+
+	data := make(map[string]interface{})
+	data["rooms"] = rooms
+	res := models.Reservation{
+		StartDate: startDate,
+		EndDate:   endDate,
+	}
+	m.App.Session.Put(r.Context(), "reservation", res)
+
+	renders.Template(w, r, "choose-room.page.tmpl", &models.TemplateData{Data: data})
+
+	// w.Write([]byte(fmt.Sprintf("start date = %s, and = %s", start, end)))
 }
 
 type jsonResp struct {
 	OK      bool   `json:"ok"`
 	Message string `json:"message"`
-}
-
-func (m *Repository) AvailabilityJson(w http.ResponseWriter, r *http.Request) {
-	//start := r.Form.Get("started")
-	//end := r.Form.Get("end")
-	//w.Write([]byte(fmt.Sprintf("Posted method, start = %s, end = %s", start, end)))
-	resp := jsonResp{
-		OK:      true,
-		Message: "available",
-	}
-
-	out, err := json.MarshalIndent(resp, "", "	")
-	if err != nil {
-		log.Print(err)
-	}
-	w.Header().Set("Content-Type", "application/json")
-	w.Write(out)
 }
 
 func (m *Repository) Contact(w http.ResponseWriter, r *http.Request) {
@@ -217,27 +241,27 @@ func (m *Repository) PostReservation(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	_, err = m.DB.InsertReservation(reservation)
+	newReservationID, err := m.DB.InsertReservation(reservation)
 
 	if err != nil {
 		helpers.ServerError(w, err)
 		return
 	}
 
-	//restriction := models.RoomRestrictions{
-	//	StartDate:     start_date,
-	//	EndDate:       end_date,
-	//	RoomID:        roomID,
-	//	ReservationID: newReservationID,
-	//	RestrictionID: 1,
-	//}
-	//
-	//err = m.DB.InsertRoomRestriction(restriction)
-	//
-	//if err != nil {
-	//	helpers.ServerError(w, err)
-	//	return
-	//}
+	restriction := models.RoomRestrictions{
+		StartDate:     start_date,
+		EndDate:       end_date,
+		RoomID:        roomID,
+		ReservationID: newReservationID,
+		RestrictionID: 1,
+	}
+
+	err = m.DB.InsertRoomRestriction(restriction)
+
+	if err != nil {
+		helpers.ServerError(w, err)
+		return
+	}
 
 	htmlMessage := fmt.Sprintf(`<strong>Reservation Confirmation</strong><br>
 		Dear %s, <br>

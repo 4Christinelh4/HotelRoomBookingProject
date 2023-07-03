@@ -1,6 +1,9 @@
 package repository
 
-import "my/gomodule/internal/models"
+import (
+	"my/gomodule/internal/models"
+	"time"
+)
 
 type DatabaseRepo interface {
 	AllUsers() bool
@@ -16,4 +19,8 @@ type DatabaseRepo interface {
 	Authenticate(email, password string) (int, string, error)
 
 	AllReservations() ([]models.Reservation, error)
+
+	SearchAvailabilityByDates(roomID int, start, end time.Time) (bool, error)
+
+	SearchAvailabilityForAllRooms(start, end time.Time) ([]models.Room, error)
 }

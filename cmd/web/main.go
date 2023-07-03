@@ -17,7 +17,7 @@ import (
 	"time"
 )
 
-const portNumber = ":8080"
+const portNumber = ":8044"
 
 var infoLog *log.Logger
 var errorLog *log.Logger
@@ -105,7 +105,7 @@ func main() {
 
 	listenForMail()
 
-	fmt.Println(fmt.Sprintf("Starting application on port 8080"))
+	fmt.Println(fmt.Sprintf("Starting application on port 8044"))
 	srv := &http.Server{
 		Addr:    portNumber,
 		Handler: RoutesApp(&app),
@@ -113,6 +113,7 @@ func main() {
 
 	err = srv.ListenAndServe()
 	if err != nil {
+		log.Println(err)
 		log.Fatal("Listen and serve error")
 	}
 }

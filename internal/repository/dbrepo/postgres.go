@@ -136,3 +136,54 @@ func (m *postgresDBRepo) AllReservations() ([]models.Reservation, error) {
 
 	return reservations, nil
 }
+
+// SearchAvailabilityByDates: check if there is any overlaps
+func (m *postgresDBRepo) SearchAvailabilityByDates(roomID int, start, end time.Time) (bool, error) {
+	//TODO implement me
+	ctx, cancel := context.WithTimeout(context.Background(), 3*time.Second)
+	defer cancel()
+
+	query := `select count(id) from room_restrictions 
+                 where room_id = $1 and $2 < end_date  and $3 > start_date)`
+
+	var numRows int
+	searchResults := m.DB.QueryRowContext(ctx, query, roomID, start, end)
+
+	err := searchResults.Scan(&numRows)
+	if err != nil {
+		return false, err
+	}
+
+	if numRows == 0 {
+		return true, nil
+	}
+
+	return false, nil
+}
+
+func (m *postgresDBRepo) SearchAvailabilityForAllRooms(start, end time.Time) ([]models.Room, error) {
+	ctx, cancel := context.WithTimeout(context.Background(), 3*time.Second)
+	defer cancel()
+
+	var rooms []models.Room
+
+	query := `select r.id, r.room_name from rooms r
+                 where r.id not in 
+                       (select room_id from room_restrictions rr
+                        where rr.start_date < $2 or rr.end_date > $1)`
+
+	searchResults, err := m.DB.QueryContext(ctx, query, start, end)
+
+	if err != nil {
+		return rooms, err
+	}
+
+	for searchResults.Next() {
+		var room models.Room
+		searchResults.Scan(&room.ID, &room.RoomName)
+
+		rooms = append(rooms, room)
+	}
+
+	return rooms, nil
+}
