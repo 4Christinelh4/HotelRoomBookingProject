@@ -28,8 +28,6 @@ with the user's session. If they don't match or the token is missing, the reques
 Mail servers use SMTP to send and receive email. It needs TCP connection to be set up.
 Process: \
 (1) establish TCP connection. \
-(2) Client: send HELO to identity check, send MAIL representing that a mail needs
-to be sent. Server sends OK to client. \
-(3) 
-
+(2) Client: send HELLO to identity check, send MAIL representing that a mail needs
+to be sent. Server sends OK to client. 
 

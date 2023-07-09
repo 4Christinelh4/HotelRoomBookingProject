@@ -2,6 +2,7 @@ package handlers
 
 import (
 	"fmt"
+	"github.com/go-chi/chi/v5"
 	"log"
 	"my/gomodule/internal/config"
 	"my/gomodule/internal/driver"
@@ -98,6 +99,24 @@ func (m *Repository) PostAvailability(w http.ResponseWriter, r *http.Request) {
 	renders.Template(w, r, "choose-room.page.tmpl", &models.TemplateData{Data: data})
 
 	// w.Write([]byte(fmt.Sprintf("start date = %s, and = %s", start, end)))
+}
+
+func (m *Repository) ChooseRoom(w http.ResponseWriter, r *http.Request) {
+	roomID, err := strconv.Atoi(chi.URLParam(r, "id"))
+	if err != nil {
+		helpers.ServerError(w, err)
+		return
+	}
+
+	res, ok := m.App.Session.Get(r.Context(), "reservation").(models.Reservation)
+	if !ok {
+		helpers.ServerError(w, err)
+		return
+	}
+
+	res.RoomID = roomID
+	m.App.Session.Put(r.Context(), "reservation", res)
+	http.Redirect(w, r, "/make-reservation", http.StatusSeeOther)
 }
 
 type jsonResp struct {
@@ -280,15 +299,15 @@ func (m *Repository) PostReservation(w http.ResponseWriter, r *http.Request) {
 	m.App.MailChan <- msg
 
 	m.App.Session.Put(r.Context(), "reservation", reservation)
-	http.Redirect(w, r, "/reservation-summary", http.StatusSeeOther)
+	http.Redirect(w, r, "reservation-summary", http.StatusSeeOther)
 }
 
 func (m *Repository) AdminDashboard(w http.ResponseWriter, r *http.Request) {
-	renders.Template(w, r, "/admin-dashboard.page.tmpl", &models.TemplateData{})
+	renders.Template(w, r, "admin-dashboard.page.tmpl", &models.TemplateData{})
 }
 
 func (m *Repository) AdminNewReservations(w http.ResponseWriter, r *http.Request) {
-	renders.Template(w, r, "/admin-new-reservations.page.tmpl", &models.TemplateData{})
+	renders.Template(w, r, "admin-new-reservations.page.tmpl", &models.TemplateData{})
 }
 
 func (m *Repository) AdminAllReservations(w http.ResponseWriter, r *http.Request) {
@@ -301,7 +320,11 @@ func (m *Repository) AdminAllReservations(w http.ResponseWriter, r *http.Request
 	data := make(map[string]interface{})
 	data["reservations"] = allReservations
 
-	renders.Template(w, r, "/admin-all-reservations.page.tmpl", &models.TemplateData{
+	renders.Template(w, r, "admin-all-reservations.page.tmpl", &models.TemplateData{
 		Data: data,
 	})
+}
+
+func (m *Repository) AdminReservationsCalendar(w http.ResponseWriter, r *http.Request) {
+	renders.Template(w, r, "admin-reservations-calendar.page.tmpl", &models.TemplateData{})
 }

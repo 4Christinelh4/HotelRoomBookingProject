@@ -25,6 +25,7 @@ func RoutesApp(app *config.AppConfig) http.Handler {
 
 	mux.Get("/search-availability", handlers.Repo.Availability)
 	mux.Post("/search-availability", handlers.Repo.PostAvailability)
+	mux.Get("/choose-room/{id}", handlers.Repo.ChooseRoom)
 
 	mux.Get("/make-reservation", handlers.Repo.Reservation)
 	mux.Post("/make-reservation", handlers.Repo.PostReservation)
@@ -43,7 +44,9 @@ func RoutesApp(app *config.AppConfig) http.Handler {
 		mux.Use(Auth)
 		mux.Get("/dashboard", handlers.Repo.AdminDashboard)
 		mux.Get("/reservations-new", handlers.Repo.AdminNewReservations)
-		mux.Get("/reservations-new", handlers.Repo.AdminAllReservations)
+		mux.Get("/reservations-all", handlers.Repo.AdminAllReservations)
+		mux.Get("/reservations-calendar", handlers.Repo.AdminReservationsCalendar)
 	})
+
 	return mux
 }

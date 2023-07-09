@@ -9,9 +9,12 @@ import (
 	"my/gomodule/internal/models"
 	"net/http"
 	"path/filepath"
+	"time"
 )
 
-var functions = template.FuncMap{}
+var functions = template.FuncMap{
+	"humanDate": HumanDate,
+}
 
 var app *config.AppConfig
 
@@ -20,7 +23,11 @@ func NewTemplates(a *config.AppConfig) {
 	app = a
 }
 
-func AddDefaultData(td *models.TemplateData, r *http.Request) {
+func HumanDate(t time.Time) string {
+	return t.Format("2006-01-02")
+}
+
+func AddDefaultData(td *models.TemplateData, r *http.Request) *models.TemplateData {
 	td.Flash = app.Session.PopString(r.Context(), "flash")
 	td.Error = app.Session.PopString(r.Context(), "error")
 	td.Warning = app.Session.PopString(r.Context(), "warning")
@@ -29,6 +36,7 @@ func AddDefaultData(td *models.TemplateData, r *http.Request) {
 	if app.Session.Exists(r.Context(), "user_id") {
 		td.IsAuthenticated = 1
 	}
+	return td
 }
 
 func Template(w http.ResponseWriter, r *http.Request, tmpl string, td *models.TemplateData) {
@@ -42,13 +50,15 @@ func Template(w http.ResponseWriter, r *http.Request, tmpl string, td *models.Te
 	}
 
 	t, ok := tc[tmpl]
+
 	if !ok {
 		log.Fatal("Cannot get template from template cache")
 	}
 
 	buf := new(bytes.Buffer)
 
-	AddDefaultData(td, r)
+	td = AddDefaultData(td, r)
+
 	_ = t.Execute(buf, td)
 
 	// render the template
@@ -70,7 +80,8 @@ func CreateTemplateCache() (map[string]*template.Template, error) {
 	// range through all files ending with *.page
 	for _, page := range pages {
 		name := filepath.Base(page)
-		ts, err := template.New(name).ParseFiles(page)
+
+		ts, err := template.New(name).Funcs(functions).ParseFiles(page)
 
 		if err != nil {
 			return myCache, err
