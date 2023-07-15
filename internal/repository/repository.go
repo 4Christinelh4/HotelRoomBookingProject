@@ -20,7 +20,11 @@ type DatabaseRepo interface {
 
 	AllReservations() ([]models.Reservation, error)
 
+	AllNewReservations() ([]models.Reservation, error)
+
 	SearchAvailabilityByDates(roomID int, start, end time.Time) (bool, error)
 
 	SearchAvailabilityForAllRooms(start, end time.Time) ([]models.Room, error)
+
+	GetReservationByID(id int) (models.Reservation, error)
 }

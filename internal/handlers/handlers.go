@@ -14,6 +14,7 @@ import (
 	"my/gomodule/internal/repository/dbrepo"
 	"net/http"
 	"strconv"
+	"strings"
 	"time"
 )
 
@@ -307,7 +308,22 @@ func (m *Repository) AdminDashboard(w http.ResponseWriter, r *http.Request) {
 }
 
 func (m *Repository) AdminNewReservations(w http.ResponseWriter, r *http.Request) {
-	renders.Template(w, r, "admin-new-reservations.page.tmpl", &models.TemplateData{})
+	newReservations, err := m.DB.AllNewReservations()
+	if err != nil {
+		helpers.ServerError(w, err)
+		return
+	}
+
+	//for _, value := range newReservations {
+	//	fmt.Printf("new reservation: %s %s\n", value.FirstName, value.LastName)
+	//}
+
+	data := make(map[string]interface{})
+	data["reservations"] = newReservations
+
+	renders.Template(w, r, "admin-new-reservations.page.tmpl", &models.TemplateData{
+		Data: data,
+	})
 }
 
 func (m *Repository) AdminAllReservations(w http.ResponseWriter, r *http.Request) {
@@ -322,6 +338,35 @@ func (m *Repository) AdminAllReservations(w http.ResponseWriter, r *http.Request
 
 	renders.Template(w, r, "admin-all-reservations.page.tmpl", &models.TemplateData{
 		Data: data,
+	})
+}
+
+func (m *Repository) AdminShowReservations(w http.ResponseWriter, r *http.Request) {
+	exploded := strings.Split(r.RequestURI, "/")
+	id, err := strconv.Atoi(exploded[4])
+
+	if err != nil {
+		helpers.ServerError(w, err)
+		return
+	}
+
+	src := exploded[3]
+
+	fmt.Printf("src = %s, id = %d\n", src, id)
+
+	stringMap := make(map[string]string)
+	stringMap["src"] = src
+	res, err := m.DB.GetReservationByID(id)
+
+	data := make(map[string]interface{})
+	data["reservation"] = res
+
+	fmt.Printf("res first name = %s, room = %s\n", res.FirstName, res.Room.RoomName)
+
+	renders.Template(w, r, "admin-reservations-show.page.tmpl", &models.TemplateData{
+		StringMap: stringMap,
+		Data:      data,
+		Form:      forms.New(nil),
 	})
 }
 

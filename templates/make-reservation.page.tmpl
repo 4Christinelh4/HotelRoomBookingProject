@@ -8,8 +8,10 @@
 
                 {{$res := index .Data "reservation"}}
 
-                <form action="/make-reservation" method="post" action="" class="needs-validation" novalidate>
+                <form action="/make-reservation" method="post" action="" class="" novalidate>
                     <input type="hidden" name="csrf_token", value="{{.CSRFToken}}">
+                    <input type="hidden" name="start_date", value="{{index .StringMap "start_date"}}">
+                    <input type="hidden" name="end_date", value="{{index .StringMap "end_date"}}">
 
                     <div class="form-group mt-3">
                         <label for="first_name">First Name:</label>
