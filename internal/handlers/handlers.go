@@ -314,10 +314,6 @@ func (m *Repository) AdminNewReservations(w http.ResponseWriter, r *http.Request
 		return
 	}
 
-	//for _, value := range newReservations {
-	//	fmt.Printf("new reservation: %s %s\n", value.FirstName, value.LastName)
-	//}
-
 	data := make(map[string]interface{})
 	data["reservations"] = newReservations
 
@@ -352,22 +348,66 @@ func (m *Repository) AdminShowReservations(w http.ResponseWriter, r *http.Reques
 
 	src := exploded[3]
 
-	fmt.Printf("src = %s, id = %d\n", src, id)
+	// fmt.Printf("src = %s, id = %d\n", src, id)
 
 	stringMap := make(map[string]string)
 	stringMap["src"] = src
 	res, err := m.DB.GetReservationByID(id)
+	if err != nil {
+		helpers.ServerError(w, err)
+		return
+	}
 
 	data := make(map[string]interface{})
 	data["reservation"] = res
 
-	fmt.Printf("res first name = %s, room = %s\n", res.FirstName, res.Room.RoomName)
+	// fmt.Printf("res first name = %s, room = %s\n", res.FirstName, res.Room.RoomName)
 
 	renders.Template(w, r, "admin-reservations-show.page.tmpl", &models.TemplateData{
 		StringMap: stringMap,
 		Data:      data,
 		Form:      forms.New(nil),
 	})
+}
+
+func (m *Repository) AdminPostShowReservations(w http.ResponseWriter, r *http.Request) {
+	err := r.ParseForm()
+	if err != nil {
+		helpers.ServerError(w, err)
+		return
+	}
+
+	exploded := strings.Split(r.RequestURI, "/")
+	id, err := strconv.Atoi(exploded[4])
+
+	if err != nil {
+		helpers.ServerError(w, err)
+		return
+	}
+
+	src := exploded[3]
+	stringMap := make(map[string]string)
+	stringMap["src"] = src
+
+	res, err := m.DB.GetReservationByID(id)
+	if err != nil {
+		helpers.ServerError(w, err)
+		return
+	}
+
+	res.FirstName = r.Form.Get("first_name")
+	res.LastName = r.Form.Get("last_name")
+	res.Email = r.Form.Get("email")
+	res.Phone = r.Form.Get("phone")
+
+	err = m.DB.UpdateReservation(res)
+	if err != nil {
+		helpers.ServerError(w, err)
+		return
+	}
+
+	m.App.Session.Put(r.Context(), "flash", "Changes saved")
+	http.Redirect(w, r, fmt.Sprintf("/admin/reservations-%s", src), http.StatusSeeOther)
 }
 
 func (m *Repository) AdminReservationsCalendar(w http.ResponseWriter, r *http.Request) {

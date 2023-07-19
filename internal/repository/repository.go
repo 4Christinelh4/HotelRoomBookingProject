@@ -27,4 +27,10 @@ type DatabaseRepo interface {
 	SearchAvailabilityForAllRooms(start, end time.Time) ([]models.Room, error)
 
 	GetReservationByID(id int) (models.Reservation, error)
+
+	UpdateReservation(u models.Reservation) error
+
+	DeleteReservation(id int) error
+
+	UpdatedProcessedForReservation(id, processed int) error
 }
