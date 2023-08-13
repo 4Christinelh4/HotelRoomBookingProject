@@ -3,7 +3,6 @@ package dbrepo
 import (
 	"context"
 	"errors"
-	"fmt"
 	"golang.org/x/crypto/bcrypt"
 	"my/gomodule/internal/models"
 	"time"
@@ -234,8 +233,6 @@ func (m *postgresDBRepo) AllNewReservations() ([]models.Reservation, error) {
 func (m *postgresDBRepo) GetReservationByID(id int) (models.Reservation, error) {
 	ctx, cancel := context.WithTimeout(context.Background(), 3*time.Second)
 	defer cancel()
-
-	fmt.Println("Get reservation by ID")
 
 	var res models.Reservation
 	query := `select r.id, r.first_name, r.last_name, r.email, r.phone, 

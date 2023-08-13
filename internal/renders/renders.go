@@ -70,7 +70,7 @@ func Template(w http.ResponseWriter, r *http.Request, tmpl string, td *models.Te
 
 func CreateTemplateCache() (map[string]*template.Template, error) {
 	myCache := map[string]*template.Template{}
-	// get all of the files named *.page from the directory
+	// get all the files named *.page from the directory
 	pages, err := filepath.Glob("templates/*.page.tmpl")
 	if err != nil {
 		// log.Println("filepath.Glob: ", err)
@@ -84,6 +84,7 @@ func CreateTemplateCache() (map[string]*template.Template, error) {
 		ts, err := template.New(name).Funcs(functions).ParseFiles(page)
 
 		if err != nil {
+			log.Println("error in page: ", page)
 			return myCache, err
 		}
 
