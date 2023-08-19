@@ -199,7 +199,7 @@ func (m *postgresDBRepo) AllNewReservations() ([]models.Reservation, error) {
 		       r.room_id, r.processed,
 		        rm.id, rm.room_name
 				from reservations r left join rooms rm on rm.id = r.room_id
-				where r.processed= 0 
+				where r.processed = 0 
 		     	order by r.start_date asc
 	`
 
@@ -280,7 +280,6 @@ func (m *postgresDBRepo) UpdatedProcessedForReservation(id, processed int) error
 	defer cancel()
 
 	query := `update reservations set processed=$1 where id=$2`
-
 	_, err := m.DB.ExecContext(ctx, query, processed, id)
 	return err
 }

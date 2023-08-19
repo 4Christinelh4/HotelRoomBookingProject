@@ -415,9 +415,14 @@ func (m *Repository) AdminReservationsCalendar(w http.ResponseWriter, r *http.Re
 }
 
 func (m *Repository) AdminProcessReservation(w http.ResponseWriter, r *http.Request) {
-	id, _ := strconv.Atoi(chi.URLParam(r, "id"))
-	src := chi.URLParam(r, "src")
+	exploded := strings.Split(r.RequestURI, "/")
+	id, _ := strconv.Atoi(exploded[4])
+	src := exploded[3]
+
+	//src := chi.URLParam(r, "src")
+
 	_ = m.DB.UpdatedProcessedForReservation(id, 1)
 	m.App.Session.Put(r.Context(), "flash", "Reservation is processed")
+	fmt.Println("AdminProcessReservation! processed, src = ", src)
 	http.Redirect(w, r, fmt.Sprintf("/admin/reservations-%s", src), http.StatusSeeOther)
 }
